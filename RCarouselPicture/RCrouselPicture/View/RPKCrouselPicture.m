@@ -564,13 +564,13 @@ NSString * const imageIdentifier = @"imageCell";
 {
     long itemIndex = [self pageControlIndexWithCurrentCellIndex:indexPath.item];
     NSString *imagePath = self.imagePathsGroup[itemIndex];
-    if (indexPath.row == 0) {
+    if (indexPath.row == 0 || indexPath.row == _totalItemsCount - 1) {
         if (self.firstIsVideo) {
             RPKVideoCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:videoIdentifier forIndexPath:indexPath];
             cell.delegate   = self;
             cell.videoUrl   = imagePath;
             cell.isAotoPlay = self.isPlayFirstVideo;
-            if (self.isPlayFirstVideo) {
+            if (self.isPlayFirstVideo && indexPath.row == 0) {
                 [cell start];
                 self.pageControl.hidden = YES;
             }
@@ -663,6 +663,7 @@ NSString * const imageIdentifier = @"imageCell";
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
+    NSLog(@"contnetOffset3:%@", NSStringFromCGPoint(scrollView.contentOffset));
     if (!self.imagePathsGroup.count) return; // 解决清除timer时偶尔会出现的问题
     int itemIndex = [self currentIndex];
     int indexOnPageControl = [self pageControlIndexWithCurrentCellIndex:itemIndex];
@@ -674,18 +675,22 @@ NSString * const imageIdentifier = @"imageCell";
         UIPageControl *pageControl = (UIPageControl *)_pageControl;
         pageControl.currentPage = indexOnPageControl;
     }
-    if (itemIndex+1 >= _imagePathsGroup.count) {
+    if (itemIndex+1 >= _totalItemsCount) {
         if (self.isInfiniteLoop) {
             itemIndex = itemIndex % _imagePathsGroup.count;
             [_mainView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:itemIndex inSection:0] atScrollPosition:UICollectionViewScrollPositionNone animated:NO];
         }
     }
     
+    if (scrollView.contentOffset.x < -30) {
+        [_mainView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:_totalItemsCount - 2 inSection:0] atScrollPosition:UICollectionViewScrollPositionNone animated:NO];
+    }
     
 }
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
 {
+    NSLog(@"contnetOffset1:%@", NSStringFromCGPoint(scrollView.contentOffset));
     if (self.autoScroll) {
         [self invalidateTimer];
     }
@@ -693,6 +698,7 @@ NSString * const imageIdentifier = @"imageCell";
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
 {
+    NSLog(@"contnetOffset2:%@", NSStringFromCGPoint(scrollView.contentOffset));
     if (self.autoScroll) {
         [self setupTimer];
     }
@@ -709,6 +715,7 @@ NSString * const imageIdentifier = @"imageCell";
     int indexOnPageControl = [self pageControlIndexWithCurrentCellIndex:itemIndex];
     if (self.firstIsVideo && indexOnPageControl == 0) {
         RPKVideoCollectionViewCell *cell = (RPKVideoCollectionViewCell *)[_mainView cellForItemAtIndexPath:[NSIndexPath indexPathForRow:indexOnPageControl inSection:0]];
+        [cell stop];
         cell.isAotoPlay = NO;
     }
 //    else {
