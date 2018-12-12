@@ -683,7 +683,7 @@ NSString * const imageIdentifier = @"imageCell";
     }
     
     if (scrollView.contentOffset.x < -30) {
-        [_mainView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:_totalItemsCount - 2 inSection:0] atScrollPosition:UICollectionViewScrollPositionNone animated:NO];
+        [_mainView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.imagePathsGroup.count - 1 inSection:0] atScrollPosition:UICollectionViewScrollPositionNone animated:NO];
     }
     
 }
